@@ -24,6 +24,7 @@
   });
 
   /* ── 2. 상태 저장 ───────────────────────────────────── */
+  const SITE_URL = 'https://jaeman-corder.github.io/english-vocab/';  // 진도가 정상 저장되는 정식 주소
   const KEY = 'evocab.v1';
   const DEFAULTS = {
     learned: 0,                 // 순서대로 학습을 끝낸 단어 수
@@ -91,9 +92,11 @@
              '본인 계정으로 열었는지 확인해 주세요.</div>';
     } else if (Sync.possible() && !Sync.available()) {
       html = '<div class="warn-strip">⚠️ <b>이 화면에서는 학습 진도가 남지 않습니다.</b> ' +
-             '계정 저장이 연결되지 않아(' + esc(Sync.state()) + '), 창을 닫으면 진도가 사라집니다. ' +
-             '학습을 마친 뒤 <button class="linkbtn" id="banner-copy">진도 코드 복사</button>를 눌러 두면 ' +
-             '<a href="#/settings">설정 → 데이터 백업</a>에서 되살릴 수 있습니다.</div>';
+             '창을 닫으면 진도가 사라집니다 — 아래 정식 주소로 학습해 주세요.<br>' +
+             '<a href="' + SITE_URL + '" target="_blank" rel="noopener">' + SITE_URL + '</a><br>' +
+             '<span class="small">여기서 하던 진도를 옮기려면 ' +
+             '<button class="linkbtn" id="banner-copy">진도 코드 복사</button> 후 ' +
+             '정식 주소의 설정 → 데이터 백업에 붙여넣으세요.</span></div>';
     } else if (!Store.ok() && !Sync.available()) {
       html = '<div class="warn-strip">⚠️ <b>이 브라우저에서는 학습 진도가 저장되지 않습니다.</b> ' +
              '사생활 보호(시크릿) 모드이거나 사이트 데이터가 차단된 상태일 수 있어요. ' +
