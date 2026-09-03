@@ -1,0 +1,16 @@
+{
+  "name": "나만의 영어회화 단어장",
+  "short_name": "영어단어장",
+  "description": "하루 15개씩 200일, 영어회화 필수단어 3,000개",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f6f7fb",
+  "theme_color": "#2a52be",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#2a52be">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="영어단어장">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>나만의 영어회화 단어장</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Noto+Sans+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="css/style.css?v=8">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><span class="dot">ə</span> 나만의 영어회화 단어장</div>
+    <nav class="tabs">
+      <a href="#/home" data-route="home">대시보드</a>
+      <a href="#/study" data-route="study">오늘의 학습</a>
+      <a href="#/review" data-route="review">복습 퀴즈</a>
+      <a href="#/words" data-route="words">단어장</a>
+      <a href="#/progress" data-route="progress">진도</a>
+      <a href="#/settings" data-route="settings">설정</a>
+    </nav>
+  </div>
+</header>
+
+<div id="banner"></div>
+<main id="app"></main>
+
+<script src="data/index.js?v=8"></script>
+<script src="data/ch01.js?v=8"></script>
+<script src="js/app.js?v=8"></script>
+</body>
+</html>
