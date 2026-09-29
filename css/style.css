@@ -237,15 +237,17 @@ main { max-width: 940px; margin: 0 auto; padding: 22px 16px 80px; }
 }
 .flash .idx { position: absolute; top: 14px; right: 16px; font-size: 12.5px; color: var(--text-3); font-weight: 650; }
 .dots { display: flex; gap: 0; justify-content: center; margin: 4px 0; flex-wrap: wrap; }
-.dots i {
-  width: 7px; height: 7px; border-radius: 999px; cursor: pointer;
-  box-sizing: content-box; padding: 12px 5px;
-  /* 보이는 크기는 7px 그대로, 손가락으로 누를 영역만 넓힌다.
-     background 단축 속성을 쓰면 background-clip 이 초기화되므로 아래는 모두 background-color 로 둔다. */
-  background-color: var(--border); background-clip: content-box;
+/* i 는 손가락으로 누를 영역(17x31)만 담당하고, 실제로 보이는 7px 원은 ::after 가 그린다.
+   배경을 잘라 쓰면 모서리 라운딩까지 깎여 네모로 보이므로 분리했다. */
+.dots i { position: relative; width: 17px; height: 31px; cursor: pointer; }
+.dots i::after {
+  content: ''; position: absolute; left: 50%; top: 50%;
+  width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px;
+  border-radius: 999px; background-color: var(--border);
+  transition: transform .15s ease, background-color .15s ease;
 }
-.dots i.done { background-color: color-mix(in srgb, var(--accent) 45%, var(--border)); }
-.dots i.cur { background-color: var(--accent); transform: scale(1.4); }
+.dots i.done::after { background-color: color-mix(in srgb, var(--accent) 45%, var(--border)); }
+.dots i.cur::after { background-color: var(--accent); transform: scale(1.4); }
 .study-nav { display: flex; gap: 10px; align-items: center; justify-content: center; }
 .kbd-hint { text-align: center; margin-top: 14px; font-size: 12px; color: var(--text-3); word-break: keep-all; }
 kbd { font-family: var(--mono); font-size: 11px; background: var(--surface-2); border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 5px; padding: 1px 5px; }
