@@ -236,8 +236,11 @@ main { max-width: 940px; margin: 0 auto; padding: 22px 16px 80px; }
   padding: 3px 9px; border-radius: 999px;
 }
 .flash .idx { position: absolute; top: 14px; right: 16px; font-size: 12.5px; color: var(--text-3); font-weight: 650; }
-.dots { display: flex; gap: 4px; justify-content: center; margin: 14px 0; flex-wrap: wrap; }
-.dots i { width: 7px; height: 7px; border-radius: 999px; background: var(--border); cursor: pointer; }
+.dots { display: flex; gap: 0; justify-content: center; margin: 4px 0; flex-wrap: wrap; }
+.dots i {
+  width: 7px; height: 7px; border-radius: 999px; background: var(--border); cursor: pointer;
+  box-sizing: content-box; padding: 12px 5px; background-clip: content-box;  /* 손가락으로 누를 영역 확보 */
+}
 .dots i.done { background: color-mix(in srgb, var(--accent) 45%, var(--border)); }
 .dots i.cur { background: var(--accent); transform: scale(1.4); }
 .study-nav { display: flex; gap: 10px; align-items: center; justify-content: center; }
@@ -309,6 +312,7 @@ input[type="range"] { accent-color: var(--accent); flex: 1; min-width: 140px; }
 
 @media (max-width: 560px) {
   .topbar-inner { flex-wrap: wrap; gap: 8px; }
-  nav.tabs { margin-left: 0; width: 100%; }
+  nav.tabs { margin-left: 0; width: 100%; flex-wrap: wrap; overflow-x: visible; gap: 4px; }
+  nav.tabs a { padding: 9px 12px; }   /* 좁은 화면에서 '설정'까지 모두 보이도록 줄바꿈 */
   .hero { padding: 18px; }
 }
