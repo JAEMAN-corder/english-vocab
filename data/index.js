@@ -3,7 +3,7 @@ window.VOCAB_META = {
   totalTarget: 3000,
   perChapter: 300,
   chapters: [
-    { id: 1,  title: "일상생활 기초 (사람·시간·장소)" },
+    { id: 1,  title: "일상 회화 (사람·시간·장소)" },
     { id: 2,  title: "감정과 상태 표현" },
     { id: 3,  title: "의사소통과 생각 표현" },
     { id: 4,  title: "일과 학업" },
