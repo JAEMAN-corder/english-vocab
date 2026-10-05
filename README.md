@@ -108,6 +108,20 @@ Artifact 뷰어는 샌드박스라 브라우저 저장소가 방문 사이에 �
 예문은 12단어 이내 구어체일 것. 챕터 2 이후를 주제별(명사/동사/형용사)로 만들 경우
 `pos` 에 품사를 넣으면 단어장 필터가 자동으로 "전체 품사"로 바뀐다.
 
+## 배포 절차
+
+```bash
+node tools/version.js   # ?v= 와 window.APP_BUILD, version.json 을 함께 올린다
+node tools/build.js     # dist/ 단일 파일 재생성 (Artifact 용)
+git add -A && git commit && git push
+```
+
+`tools/version.js` 를 거르면 안 된다. 홈 화면 앱(standalone)은 주소창도
+새로고침 버튼도 없어 캐시된 HTML을 계속 들고 있을 수 있는데, 앱은 실행할 때
+`version.json` 을 no-store 로 읽어 `window.APP_BUILD` 와 다르면 쿼리를 바꿔
+한 번 새로 받아온다. 그래도 반영되지 않으면 무한 새로고침 대신 안내 띠를
+띄운다. 설정 → 앱 버전에서 수동 확인도 가능하다.
+
 ## 빌드 (단일 파일)
 
 ```bash

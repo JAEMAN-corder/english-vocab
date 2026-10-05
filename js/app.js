@@ -97,6 +97,10 @@
              '<span class="small">여기서 하던 진도를 옮기려면 ' +
              '<button class="linkbtn" id="banner-copy">진도 코드 복사</button> 후 ' +
              '정식 주소의 설정 → 데이터 백업에 붙여넣으세요.</span></div>';
+    } else if (/적용 실패/.test(updateState)) {
+      html = '<div class="warn-strip">새 버전이 있는데 적용되지 않았습니다. ' +
+             '홈 화면 앱을 완전히 닫았다가 다시 열어보세요. ' +
+             '<a href="#/settings">설정 → 버전</a>에서 다시 시도할 수 있습니다.</div>';
     } else if (!Store.ok() && !Sync.available()) {
       html = '<div class="warn-strip">⚠️ <b>이 브라우저에서는 학습 진도가 저장되지 않습니다.</b> ' +
              '사생활 보호(시크릿) 모드이거나 사이트 데이터가 차단된 상태일 수 있어요. ' +
@@ -213,6 +217,42 @@
   function persist() {
     save();
     Sync.push(S);
+  }
+
+
+  /* ── 자동 업데이트 ─────────────────────────────────────
+     홈 화면 앱(standalone)은 주소창도 새로고침 버튼도 없어서, 한번 캐시된
+     HTML을 계속 들고 있을 수 있다. 그러면 새 기능이나 버그 수정이 반영되지
+     않는다. 그래서 실행할 때 version.json 을 캐시 없이 읽어 자기 빌드와
+     비교하고, 다르면 쿼리를 바꿔 한 번만 새로 받아온다. */
+  let updateState = window.APP_BUILD ? '확인 중' : '확인 불가';
+  function setUpdateState(v) {
+    updateState = v;
+    const el = document.getElementById('updState');
+    if (el) el.textContent = '(' + v + ')';
+  }
+  function checkForUpdate(manual, done) {
+    if (!window.APP_BUILD) { setUpdateState('확인 불가'); if (done) done(updateState); return; }
+    fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (v) {
+        if (!v || !v.build) { setUpdateState('확인 불가'); if (done) done(updateState); return; }
+        if (v.build === window.APP_BUILD) { setUpdateState('최신 버전'); if (done) done(updateState); return; }
+        let tried = null;
+        try { tried = sessionStorage.getItem('evocab.reloadedFor'); } catch (e) {}
+        if (!manual && tried === v.build) {
+          // 이미 한 번 시도했는데도 그대로다 — 무한 새로고침 대신 알린다
+          setUpdateState('새 버전 ' + v.build + ' 있음 (적용 실패)');
+          renderBanner();
+          if (done) done(updateState);
+          return;
+        }
+        try { sessionStorage.setItem('evocab.reloadedFor', v.build); } catch (e) {}
+        const u = new URL(location.href);
+        u.searchParams.set('b', v.build);
+        location.replace(u.toString());
+      })
+      .catch(function () { setUpdateState('확인 불가'); if (done) done(updateState); });
   }
 
   /* ── 3. 파생 계산 ───────────────────────────────────── */
@@ -852,6 +892,9 @@
         diagRow('저장된 진도', S.learned + '단어 · 완료 ' + doneDays() + 'Day · 기록 ' + S.log.length + '건') +
         diagRow('마지막 저장', lastSaveAt ? lastSaveAt.toLocaleString('ko-KR') : '이번 접속에서 아직 없음') +
         diagRow('저장 위치', esc(location.protocol + '//' + (location.host || '(로컬 파일)'))) +
+        diagRow('앱 버전', (window.APP_BUILD ? '빌드 ' + esc(window.APP_BUILD) : '알 수 없음') +
+            ' <span class="small muted" id="updState">(' + esc(updateState) + ')</span>' +
+            ' <button class="linkbtn" id="chkUpdate">업데이트 확인</button>') +
         diagRow('발음 지원', TTS.supported ? '지원됨 · 영어 음성 ' + TTS.list().length + '개' : '지원 안 됨') +
         (Store.ok() || Sync.available() ? '' :
           '<div class="pad small" style="border-top:1px solid var(--border);color:var(--text-2)">' +
@@ -881,6 +924,11 @@
     if (TTS.supported && !voices.length) {
       TTS.whenReady(function () { if (location.hash.indexOf('settings') > -1) router(); });
     }
+    const cu = $('#chkUpdate');
+    if (cu) cu.onclick = function () {
+      cu.textContent = '확인 중…';
+      checkForUpdate(true, function (msg) { toast(msg); router(); });
+    };
     const ta = $('#backup');
     ta.value = JSON.stringify(S);
     $('#copy').onclick = function () { copyText(ta.value, '진도 코드를 복사했습니다'); };
@@ -923,8 +971,9 @@
     }
     router();
     startSync();
+    checkForUpdate(false);
   });
   if (document.readyState !== 'loading') {   // 이미 로드된 경우
-    setTimeout(function () { router(); startSync(); }, 0);
+    setTimeout(function () { router(); startSync(); checkForUpdate(false); }, 0);
   }
 })();
