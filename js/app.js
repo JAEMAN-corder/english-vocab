@@ -552,13 +552,16 @@
         '<div style="margin-top:8px"><span class="badge ' + w.pos + '">' + w.pos + '</span></div>' +
         '<div class="meaning' + (hideKr() ? ' hidden-kr' : '') + '" id="meaning">' + esc(w.kr) + '</div>' +
         '<div class="practice">' +
-          '<button class="chip' + (krMode ? ' on' : '') + '" id="tKr">뜻 가리기</button>' +
-          '<button class="chip' + (enMode ? ' on' : '') + '" id="tEn">영어 문장 가리기</button>' +
+          '<button class="chip' + (krMode ? ' on' : '') + '" id="tKr">뜻 ' +
+            (krMode ? '가리는 중' : '보이는 중') + '</button>' +
+          '<button class="chip' + (enMode ? ' on' : '') + '" id="tEn">영어 문장 ' +
+            (enMode ? '가리는 중' : '보이는 중') + '</button>' +
         '</div>' +
         '<div class="ex" id="ex">' +
           (hideEn()
             ? '<div class="kr first">' + esc(w.enkr) + '</div>' +
-              '<div class="en covered" id="reveal">한국어를 보고 영어로 말해 본 뒤 눌러서 확인하세요</div>'
+              '<div class="covered-hint">한국어를 보고 영어로 말해 보세요</div>' +
+              '<button class="en covered" id="reveal">영어 문장 확인하기</button>'
             : '<div class="en"><span>' + esc(w.en) + '</span><span class="spk">🔊</span></div>' +
               '<div class="kr">' + esc(w.enkr) + '</div>') +
         '</div>' +
@@ -860,6 +863,12 @@
             '<option value="' + n + '"' + (n === perDay() ? ' selected' : '') + '>' + n + '개</option>').join('') + '</select>' +
           '<span class="small muted">전체 ' + Math.ceil(META.totalTarget / perDay()) + '일 예상</span>' +
           '<div class="desc">Day 구분 기준이 바뀝니다. 이미 학습한 단어 수(' + nf(S.learned) + '개)는 그대로 유지됩니다.</div></div>' +
+        '<div class="set-row" style="border-top:1px solid var(--border)"><span class="lbl">영어 문장 가리기</span>' +
+          '<select id="hideEnSet">' +
+            '<option value="on"' + (S.settings.hideEn !== false ? ' selected' : '') + '>켜기 — 한국어를 보고 말해 본 뒤 확인</option>' +
+            '<option value="off"' + (S.settings.hideEn === false ? ' selected' : '') + '>끄기 — 영어 문장을 바로 보여주기</option>' +
+          '</select>' +
+          '<div class="desc">학습 화면의 칩으로도 바꿀 수 있습니다. 기기마다 따로 저장됩니다.</div></div>' +
       '</div>' +
       '<div class="section-title">발음</div>' +
       '<div class="card">' +
@@ -914,6 +923,11 @@
         '</div>' +
       '</div>';
 
+    $('#hideEnSet').onchange = function () {
+      S.settings.hideEn = this.value === 'on';
+      save();
+      toast(S.settings.hideEn ? '영어 문장을 가립니다' : '영어 문장을 바로 보여줍니다');
+    };
     $('#perDay').onchange = function () { S.settings.perDay = +this.value; persist(); toast('하루 ' + this.value + '개로 변경했습니다'); router(); };
     const rate = $('#rate');
     if (rate) {
