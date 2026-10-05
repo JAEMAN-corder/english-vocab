@@ -4,7 +4,7 @@ window.VOCAB_META = {
   perChapter: 300,
   chapters: [
     { id: 1,  title: "핵심 동사로 말하기 (get · take · have · make …)" },
-    { id: 2,  title: "감정과 상태 표현" },
+    { id: 2,  title: "필수 동사 확장 (be · say · think · pay …)" },
     { id: 3,  title: "의사소통과 생각 표현" },
     { id: 4,  title: "일과 학업" },
     { id: 5,  title: "취미와 여가" },

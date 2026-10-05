@@ -61,7 +61,8 @@ Artifact 뷰어는 샌드박스라 브라우저 저장소가 방문 사이에 �
 
 - `data/index.js` — 10개 챕터 메타데이터
 - `data/ch01.js` — 챕터 1 「핵심 동사로 말하기」 300표현 / Day 1~20 ✅
-- 챕터 2~10은 미작성
+- `data/ch02.js` — 챕터 2 「필수 동사 확장」 300표현 / Day 21~40 ✅
+- 챕터 3~10은 미작성
 
 ### 챕터 1 설계 원칙
 
@@ -81,6 +82,20 @@ Artifact 뷰어는 샌드박스라 브라우저 저장소가 방문 사이에 �
 | | | 18 | run · bring |
 | | | 19 | let · set |
 | | | 20 | break/hold/call/work/leave 등 |
+
+챕터 2(Day 21~40)도 같은 방식이다.
+
+| Day | 동사 | Day | 동사 |
+|---|---|---|---|
+| 21~22 | be (30) | 31 | check · try |
+| 23 | say · tell | 32 | hang · stand · sit |
+| 24 | talk · speak | 33 | cut · fill · fix |
+| 25 | ask · answer | 34 | catch · miss |
+| 26 | think · know | 35 | move · pass |
+| 27 | feel · mean | 36 | watch · wait |
+| 28 | mind · care | 37 | help · need · want |
+| 29 | pay · spend · cost | 38 | start · stop · finish |
+| 30 | pick · drop | 39~40 | 조동사 · 반응 표현 |
 
 데이터 형식 (`pos` 에는 품사가 아니라 **그 날의 핵심 동사**가 들어간다):
 

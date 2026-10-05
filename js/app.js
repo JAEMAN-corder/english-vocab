@@ -32,7 +32,7 @@
     wrong: {},                  // 퀴즈 오답 횟수 {word: n}
     pos: null,                  // 학습 중이던 위치 {d: Day, i: 카드 번호}
     startedAt: null,
-    settings: { perDay: 15, voiceURI: '', rate: 0.92 }
+    settings: { perDay: 15, voiceURI: '', rate: 0.92, hideEn: true }
   };
 
   // 브라우저 저장소는 사생활 보호 모드·사이트 데이터 차단 등으로 조용히 실패할 수 있다.
@@ -472,7 +472,8 @@
     const isDone = d <= doneDays();
     // 중간에 나갔다 돌아와도 보던 카드에서 이어지도록
     let i = (S.pos && S.pos.d === d && S.pos.i > 0 && S.pos.i < cards.length) ? S.pos.i : 0;
-    let hideKr = false, hideEn = false;
+    // 영어 문장은 기본적으로 가린다 — 한국어를 보고 직접 말해 보는 게 목적이다
+    let hideKr = false, hideEn = S.settings.hideEn !== false;
 
     root.innerHTML =
       '<div class="study-head">' +
@@ -534,7 +535,12 @@
       exEl.onclick = () => { if (hideEn) { hideEn = false; render(); } else { say(w.en, exEl); } };
       $('#meaning').onclick = () => { if (hideKr) { hideKr = false; render(); } };
       $('#tKr').onclick = () => { hideKr = !hideKr; render(); };
-      $('#tEn').onclick = () => { hideEn = !hideEn; render(); };
+      $('#tEn').onclick = () => {
+        hideEn = !hideEn;
+        S.settings.hideEn = hideEn;   // 다음 카드·다음 접속에도 유지
+        save();
+        render();
+      };
       const hint = $('#hint');
       if (hint) hint.style.display = (i === cards.length - 1) ? 'none' : '';
 
