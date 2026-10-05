@@ -472,7 +472,7 @@
     const isDone = d <= doneDays();
     // 중간에 나갔다 돌아와도 보던 카드에서 이어지도록
     let i = (S.pos && S.pos.d === d && S.pos.i > 0 && S.pos.i < cards.length) ? S.pos.i : 0;
-    let hideKr = false;
+    let hideKr = false, hideEn = false;
 
     root.innerHTML =
       '<div class="study-head">' +
@@ -490,23 +490,32 @@
       '<div class="dots" id="dots"></div>' +
       '<div class="study-nav">' +
         '<button class="btn" id="prev">← 이전</button>' +
-        '<button class="btn ghost" id="toggleKr">뜻 가리기</button>' +
         '<button class="btn primary" id="next">다음 →</button>' +
       '</div>' +
-      '<div class="kbd-hint"><kbd>←</kbd> <kbd>→</kbd> 카드 이동 · <kbd>space</kbd> 단어 발음 · ' +
-        '<kbd>S</kbd> 예문 발음 · <kbd>H</kbd> 뜻 가리기</div>';
+      '<div class="kbd-hint"><kbd>←</kbd> <kbd>→</kbd> 카드 이동 · <kbd>space</kbd> 표현 발음 · ' +
+        '<kbd>S</kbd> 예문 발음 · <kbd>H</kbd> 뜻 가리기 · <kbd>E</kbd> 영어 문장 가리기</div>';
 
     function render() {
       const w = cards[i];
       $('#flash').innerHTML =
         (w._review ? '<div class="rev-tag">복습</div>' : '') +
         '<div class="idx">' + (i + 1) + ' / ' + cards.length + '</div>' +
-        '<div><span class="word" id="word">' + esc(w.w) + '<span class="spk">🔊</span></span></div>' +
+        '<div><span class="word' + (w.w.length > 15 ? ' long' : '') + '" id="word">' +
+          esc(w.w) + '<span class="spk">🔊</span></span></div>' +
         '<div class="ipa">' + esc(w.ipa) + '</div>' +
         '<div style="margin-top:8px"><span class="badge ' + w.pos + '">' + w.pos + '</span></div>' +
         '<div class="meaning' + (hideKr ? ' hidden-kr' : '') + '" id="meaning">' + esc(w.kr) + '</div>' +
-        '<div class="ex" id="ex"><div class="en"><span>' + esc(w.en) + '</span><span class="spk">🔊</span></div>' +
-          '<div class="kr">' + esc(w.enkr) + '</div></div>' +
+        '<div class="practice">' +
+          '<button class="chip' + (hideKr ? ' on' : '') + '" id="tKr">뜻 가리기</button>' +
+          '<button class="chip' + (hideEn ? ' on' : '') + '" id="tEn">영어 문장 가리기</button>' +
+        '</div>' +
+        '<div class="ex" id="ex">' +
+          (hideEn
+            ? '<div class="kr first">' + esc(w.enkr) + '</div>' +
+              '<div class="en covered" id="reveal">한국어를 보고 영어로 말해 본 뒤 눌러서 확인하세요</div>'
+            : '<div class="en"><span>' + esc(w.en) + '</span><span class="spk">🔊</span></div>' +
+              '<div class="kr">' + esc(w.enkr) + '</div>') +
+        '</div>' +
         (i === cards.length - 1
           ? '<div style="margin-top:22px">' + (isCurrent
               ? '<button class="btn primary lg" id="done">✅ Day ' + d + ' 학습 완료</button>'
@@ -518,12 +527,14 @@
         '<i class="' + (n === i ? 'cur' : n < i ? 'done' : '') + '" data-n="' + n + '"></i>').join('');
       $('#prev').disabled = i === 0;
       $('#next').disabled = i === cards.length - 1;
-      $('#toggleKr').textContent = hideKr ? '뜻 보이기' : '뜻 가리기';
 
       const wordEl = $('#word'), exEl = $('#ex');
       wordEl.onclick = () => say(w.w, wordEl);
-      exEl.onclick = () => say(w.en, exEl);
+      // 영어를 가린 상태에서는 탭이 '정답 확인'이고, 보이는 상태에서는 발음 재생이다
+      exEl.onclick = () => { if (hideEn) { hideEn = false; render(); } else { say(w.en, exEl); } };
       $('#meaning').onclick = () => { if (hideKr) { hideKr = false; render(); } };
+      $('#tKr').onclick = () => { hideKr = !hideKr; render(); };
+      $('#tEn').onclick = () => { hideEn = !hideEn; render(); };
       const hint = $('#hint');
       if (hint) hint.style.display = (i === cards.length - 1) ? 'none' : '';
 
@@ -552,7 +563,6 @@
 
     $('#prev').onclick = () => { if (i > 0) { i--; render(); } };
     $('#next').onclick = () => { if (i < cards.length - 1) { i++; render(); } };
-    $('#toggleKr').onclick = () => { hideKr = !hideKr; render(); };
     $('#dots').onclick = (e) => { const n = e.target.dataset.n; if (n != null) { i = +n; render(); } };
 
     function onKey(e) {
@@ -560,8 +570,12 @@
       if (e.key === 'ArrowRight') { if (i < cards.length - 1) { i++; render(); } }
       else if (e.key === 'ArrowLeft') { if (i > 0) { i--; render(); } }
       else if (e.code === 'Space') { e.preventDefault(); const el = $('#word'); if (el) say(cards[i].w, el); }
-      else if (e.key === 's' || e.key === 'S') { const el = $('#ex'); if (el) say(cards[i].en, el); }
+      else if (e.key === 's' || e.key === 'S') {
+        if (hideEn) { hideEn = false; render(); }
+        const el = $('#ex'); if (el) say(cards[i].en, el);
+      }
       else if (e.key === 'h' || e.key === 'H') { hideKr = !hideKr; render(); }
+      else if (e.key === 'e' || e.key === 'E') { hideEn = !hideEn; render(); }
     }
     document.addEventListener('keydown', onKey);
     cleanup = () => document.removeEventListener('keydown', onKey);
@@ -673,7 +687,8 @@
         '<select id="ch"><option value="">전체 챕터</option>' +
           META.chapters.filter(c => CHAPTERS[c.id]).map(c => '<option value="' + c.id + '">' + c.id + '. ' + esc(c.title) + '</option>').join('') +
         '</select>' +
-        '<select id="pos"><option value="">전체 품사</option><option>명사</option><option>동사</option><option>형용사</option><option>부사</option></select>' +
+        '<select id="pos"><option value="">전체 ' + posLabel() + '</option>' +
+          posValues().map(function (v) { return '<option>' + esc(v) + '</option>'; }).join('') + '</select>' +
         '<select id="st"><option value="">전체</option><option value="done">학습 완료만</option><option value="todo">아직 안 배운 것만</option></select>' +
       '</div>' +
       '<div id="cnt" class="small muted" style="margin-bottom:10px"></div>' +
@@ -699,6 +714,16 @@
     }
     ['q', 'ch', 'pos', 'st'].forEach(id => { const el = $('#' + id); el.oninput = apply; el.onchange = apply; });
     apply();
+  }
+
+  // 챕터에 따라 분류 축이 달라진다 — 핵심 동사(get/take…) 또는 품사(명사/동사…)
+  function posValues() {
+    const seen = [];
+    ALL.forEach(function (w) { if (seen.indexOf(w.pos) < 0) seen.push(w.pos); });
+    return seen;
+  }
+  function posLabel() {
+    return posValues().some(function (v) { return /^[a-z]/i.test(v); }) ? '동사' : '품사';
   }
 
   function wordItem(w, plain) {

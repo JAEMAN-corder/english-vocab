@@ -220,6 +220,17 @@ main { max-width: 940px; margin: 0 auto; padding: 22px 16px 80px; }
 .flash .ipa { font-family: var(--mono); font-size: 17px; color: var(--text-2); }
 .flash .meaning { font-size: 26px; font-weight: 700; margin-top: 10px; }
 .flash .meaning.hidden-kr { color: transparent; background: var(--surface-2); border-radius: 8px; cursor: pointer; user-select: none; }
+.flash .word.long { font-size: clamp(24px, 6.2vw, 38px); }   /* 여러 단어로 된 표현용 */
+
+/* 연습 모드 칩 */
+.practice { display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+.chip {
+  border: 1px solid var(--border); background: var(--surface); color: var(--text-2);
+  border-radius: 999px; padding: 7px 14px; font-size: 13px; font-weight: 650; cursor: pointer;
+}
+.chip:hover { background: var(--surface-2); color: var(--text); }
+.chip.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-text); }
+
 .flash .ex {
   margin-top: 20px; padding: 16px; border-radius: 12px; background: var(--surface-2);
   cursor: pointer; text-align: left; transition: box-shadow .15s;
@@ -230,6 +241,11 @@ main { max-width: 940px; margin: 0 auto; padding: 22px 16px 80px; }
 .flash .ex .en > span:first-child { flex: 1; }
 .flash .ex .en .spk { font-size: 15px; }
 .flash .ex .kr { font-size: 14.5px; color: var(--text-2); margin-top: 4px; }
+.flash .ex .kr.first { font-size: 16.5px; color: var(--text); font-weight: 600; margin: 0 0 10px; }
+.flash .ex .en.covered {
+  display: block; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--accent-text);
+  background: var(--accent-soft); border-radius: 9px; padding: 14px 12px; text-align: center;
+}
 .flash .rev-tag {
   position: absolute; top: 14px; left: 16px;
   background: var(--mark-soft); color: var(--mark); font-size: 11.5px; font-weight: 750;
