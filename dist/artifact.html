@@ -1529,8 +1529,13 @@ window.VOCAB_CHAPTERS[2] = {
     const isDone = d <= doneDays();
     // 중간에 나갔다 돌아와도 보던 카드에서 이어지도록
     let i = (S.pos && S.pos.d === d && S.pos.i > 0 && S.pos.i < cards.length) ? S.pos.i : 0;
-    // 영어 문장은 기본적으로 가린다 — 한국어를 보고 직접 말해 보는 게 목적이다
-    let hideKr = false, hideEn = S.settings.hideEn !== false;
+    // 가리기 '모드'는 카드를 넘겨도 유지되고, '정답 확인'은 그 카드에서만 풀린다.
+    // (예전에는 한 번 확인하면 모드 자체가 꺼져 다음 카드부터 영어가 계속 보였다)
+    let krMode = false, enMode = S.settings.hideEn !== false;
+    let krShown = false, enShown = false;
+    const hideKr = () => krMode && !krShown;
+    const hideEn = () => enMode && !enShown;
+    const goTo = (n) => { i = n; krShown = false; enShown = false; render(); };
 
     root.innerHTML =
       '<div class="study-head">' +
@@ -1562,13 +1567,13 @@ window.VOCAB_CHAPTERS[2] = {
           esc(w.w) + '<span class="spk">🔊</span></span></div>' +
         '<div class="ipa">' + esc(w.ipa) + '</div>' +
         '<div style="margin-top:8px"><span class="badge ' + w.pos + '">' + w.pos + '</span></div>' +
-        '<div class="meaning' + (hideKr ? ' hidden-kr' : '') + '" id="meaning">' + esc(w.kr) + '</div>' +
+        '<div class="meaning' + (hideKr() ? ' hidden-kr' : '') + '" id="meaning">' + esc(w.kr) + '</div>' +
         '<div class="practice">' +
-          '<button class="chip' + (hideKr ? ' on' : '') + '" id="tKr">뜻 가리기</button>' +
-          '<button class="chip' + (hideEn ? ' on' : '') + '" id="tEn">영어 문장 가리기</button>' +
+          '<button class="chip' + (krMode ? ' on' : '') + '" id="tKr">뜻 가리기</button>' +
+          '<button class="chip' + (enMode ? ' on' : '') + '" id="tEn">영어 문장 가리기</button>' +
         '</div>' +
         '<div class="ex" id="ex">' +
-          (hideEn
+          (hideEn()
             ? '<div class="kr first">' + esc(w.enkr) + '</div>' +
               '<div class="en covered" id="reveal">한국어를 보고 영어로 말해 본 뒤 눌러서 확인하세요</div>'
             : '<div class="en"><span>' + esc(w.en) + '</span><span class="spk">🔊</span></div>' +
@@ -1589,12 +1594,14 @@ window.VOCAB_CHAPTERS[2] = {
       const wordEl = $('#word'), exEl = $('#ex');
       wordEl.onclick = () => say(w.w, wordEl);
       // 영어를 가린 상태에서는 탭이 '정답 확인'이고, 보이는 상태에서는 발음 재생이다
-      exEl.onclick = () => { if (hideEn) { hideEn = false; render(); } else { say(w.en, exEl); } };
-      $('#meaning').onclick = () => { if (hideKr) { hideKr = false; render(); } };
-      $('#tKr').onclick = () => { hideKr = !hideKr; render(); };
+      // 가려진 상태에서 탭하면 이 카드만 정답을 보여준다 (모드는 그대로 유지)
+      exEl.onclick = () => { if (hideEn()) { enShown = true; render(); } else { say(w.en, exEl); } };
+      $('#meaning').onclick = () => { if (hideKr()) { krShown = true; render(); } };
+      $('#tKr').onclick = () => { krMode = !krMode; krShown = false; render(); };
       $('#tEn').onclick = () => {
-        hideEn = !hideEn;
-        S.settings.hideEn = hideEn;   // 다음 카드·다음 접속에도 유지
+        enMode = !enMode;
+        enShown = false;
+        S.settings.hideEn = enMode;   // 다음 카드·다음 접속에도 유지
         save();
         render();
       };
@@ -1624,21 +1631,23 @@ window.VOCAB_CHAPTERS[2] = {
       TTS.speak(text, { onend: () => el.classList.remove('speaking') });
     }
 
-    $('#prev').onclick = () => { if (i > 0) { i--; render(); } };
-    $('#next').onclick = () => { if (i < cards.length - 1) { i++; render(); } };
-    $('#dots').onclick = (e) => { const n = e.target.dataset.n; if (n != null) { i = +n; render(); } };
+    $('#prev').onclick = () => { if (i > 0) goTo(i - 1); };
+    $('#next').onclick = () => { if (i < cards.length - 1) goTo(i + 1); };
+    $('#dots').onclick = (e) => { const n = e.target.dataset.n; if (n != null) goTo(+n); };
 
     function onKey(e) {
       if (/input|textarea|select/i.test(e.target.tagName)) return;
-      if (e.key === 'ArrowRight') { if (i < cards.length - 1) { i++; render(); } }
-      else if (e.key === 'ArrowLeft') { if (i > 0) { i--; render(); } }
+      if (e.key === 'ArrowRight') { if (i < cards.length - 1) goTo(i + 1); }
+      else if (e.key === 'ArrowLeft') { if (i > 0) goTo(i - 1); }
       else if (e.code === 'Space') { e.preventDefault(); const el = $('#word'); if (el) say(cards[i].w, el); }
       else if (e.key === 's' || e.key === 'S') {
-        if (hideEn) { hideEn = false; render(); }
+        if (hideEn()) { enShown = true; render(); }
         const el = $('#ex'); if (el) say(cards[i].en, el);
       }
-      else if (e.key === 'h' || e.key === 'H') { hideKr = !hideKr; render(); }
-      else if (e.key === 'e' || e.key === 'E') { hideEn = !hideEn; render(); }
+      else if (e.key === 'h' || e.key === 'H') { krMode = !krMode; krShown = false; render(); }
+      else if (e.key === 'e' || e.key === 'E') {
+        enMode = !enMode; enShown = false; S.settings.hideEn = enMode; save(); render();
+      }
     }
     document.addEventListener('keydown', onKey);
     cleanup = () => document.removeEventListener('keydown', onKey);
